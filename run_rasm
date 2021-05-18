@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python3.8 -m scripts.run_rasm $@
+python3.9 -m scripts.run_rasm $@

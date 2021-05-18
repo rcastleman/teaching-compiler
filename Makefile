@@ -1,4 +1,4 @@
-PYTHON = python3.8 # just should be >= 3.7
+PYTHON = python3.9 # just should be >= 3.7
 TESTS = vm_tests \
 	parser_tests \
 	rasm_parser_tests \

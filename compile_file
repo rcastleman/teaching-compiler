@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-python3.8 -m scripts.compile_file $@
+python3.9 -m scripts.compile_file $@

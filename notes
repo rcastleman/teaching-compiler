@@ -1,5 +1,4 @@
 
-
 source language program
 5
 
@@ -15,3 +14,28 @@ Abstract syntax: source language
 (sub1 (add1 7)) --> Sub1(Add1(Num(7)))
 
 5 --> mov 5, rans
+
+5/29:
+
+source:
+"(+ 1 2)"
+
+parser for the src language:
+Plus(Num(1), Num(2))
+
+compiler:
+Mov(Num(1), Rans()),
+Add(Num(2), Rans())
+
+--> rasm VM, runs it
+
+--> write to file
+"mov 1, rans
+add 2, rans"
+
+
+--------
+
+mov 5, rans  --> Mov(Imm(5), Rans())
+add 10, rans --> Add(Imm(10), Rans())
+sub 5, rsp  --> Sub(Imm(5), Rsp())

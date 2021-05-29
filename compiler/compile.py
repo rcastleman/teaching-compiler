@@ -24,6 +24,16 @@ def compile(defns: List[Defn], body: Expr) -> List[Instr]:
 def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]:
   """Generates instructions for a given expression, at a given stack
   index, and in a given environment"""
+
+  if exp.isNum():
+    return [Mov(Imm(exp.value), Rans())]
+
+  if exp.isAdd1():
+    return compile_expr(exp.operand,defns,si,env) + [Add(Imm(1),Rans())]
+  
+  if exp.isSub1():
+    return compile_expr(exp.operand,defns,si,env) + [Sub(Imm(1),Rans())]
+
   raise NotImplementedError("compile_expr")
 
 def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:

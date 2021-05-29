@@ -1,0 +1,17 @@
+
+
+source language program
+5
+
+interp(5) -> 5
+compile([], 5) -> program
+
+program we generate has property:
+    - when it finishes running, 5 is in rans
+
+Abstract syntax: source language
+100             --> Num(100)
+(+ 1 2)         --> Plus(Num(1), Num(2))
+(sub1 (add1 7)) --> Sub1(Add1(Num(7)))
+
+5 --> mov 5, rans

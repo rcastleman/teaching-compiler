@@ -6,7 +6,8 @@ Materials for teaching/learning about compilers.
 Note: this project expects Python >= 3.7 installed.
 
 ## Source Language
-The source language is a Lisp-like language supporting numbers, a few built-in operators, let bindings, conditionals, and functions (not first-class).
+The source language is a Lisp-like language supporting numbers, a few built-in 
+operators, let bindings, conditionals, and functions (not first-class).
 
 The concrete syntax of the source language:
 ```
@@ -14,6 +15,7 @@ The concrete syntax of the source language:
           | <name>
           | (add1 <expr>)
           | (sub1 <expr>)
+          | (print <expr>)
           | (+ <expr> <expr>)
           | (- <expr> <expr>)
           | (* <expr> <expr>)
@@ -31,6 +33,7 @@ Expr is one of:
   | Num(value: float)
   | Add1(operand: Expr)
   | Sub1(operand: Expr)
+  | PrintExpr(operand: Expr)
   | Plus(left: Expr, right: Expr)
   | Minus(left: Expr, right: Expr)
   | Times(left: Expr, right: Expr)
@@ -44,7 +47,14 @@ A Defn is:
   Defn(name: str, params: List[str], body: Expr)
 ```
 
-A valid program in the source language consists of 0 or more function definitions, followed by a body expression that will be evaluated as the result of the program. The body expression *must* appear last. 
+A valid program in the source language consists of 0 or more function definitions, 
+followed by 0 or more expressions. Note that the order of these is strictly definitions,
+then expressions, and they do not mingle.
+
+The `print` built-in evaluates to its operand. Note that in the absence of calls 
+to `print`, no output will be produced by a compiled program. The exception to 
+this is in the REPL, in which expressions are evaluated and printed without
+needing a call to `print`.
 
 For example source programs, see the `examples/` directory.
 
@@ -66,8 +76,11 @@ It does not run natively on hardware but instead runs in a virtual machine.
 | `jne <label>`         | Start executing at the label, if `fequal` is NOT set |
 | `call <label>`        | Increment `rsp`, write a return address at `[rsp + 0]`, and jump to `<label>` |
 | `ret`                 | Jump to the return address at `[rsp + 0]`, decrement `rsp` |
+| `print <op>`          | Prints the value of the given operand to stdout |
 
-Operands for instructions like `mov` can be immediate values, `rans`, `rsp`, or a location on the stack at an offset from `rsp` (`[rsp + offset]`). Note that for an operand to be a valid destination, it cannot be an immediate value. 
+Operands for instructions like `mov` can be immediate values, `rans`, `rsp`, or 
+a location on the stack at an offset from `rsp` (`[rsp + offset]`). Note that 
+for an operand to be a valid destination, it cannot be an immediate value. 
 
 The abstract syntax of the target language is given by the following constructors:
 ```
@@ -83,6 +96,7 @@ Instr is one of:
   | Jne(target: str)
   | Call(target: str)
   | Ret()
+  | Print(operand: Operand)
 
 Operand is one of:
   | Imm(value: float)
@@ -117,7 +131,8 @@ The compiler, correctly implemented, should raise errors in the following situat
 | `UnboundName(name)`         | An identifier appeared in the program without a binding occurrence |
 
 ## Tests
-To run all tests, run `make test` from the project root. Note that compiler tests should fail if the compiler hasn't been implemented yet.
+To run all tests, run `make test` from the project root. Note that compiler tests 
+should fail if the compiler hasn't been implemented yet.
 
 ## Scripts
 There are a few scripts for useful tasks:

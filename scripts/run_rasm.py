@@ -21,7 +21,6 @@ try:
     instrs = parse_rasm(pgrm)
     vm = VirtualMachine()
     vm.execute(instrs)
-    print_num(vm.rans)
   except (LexError, ParseError, VMError) as err:
     print(err)
   except Exception as err:

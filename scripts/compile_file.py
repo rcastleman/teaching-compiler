@@ -32,19 +32,13 @@ try:
 
   try:
     # parse defns and body
-    parsed = parse_program(pgrm)
-    defns = parsed[0]
-    body = parsed[1]
-
-    if body is None:
-      print("program has no body")
-      sys.exit(1)
+    (defns, exprs) = parse_program(pgrm)
 
     # compile program to rasm
     if args.demo:
-      instrs = demo_compile(defns, body)
+      instrs = demo_compile(defns, exprs)
     else:
-      instrs = student_compile(defns, body)
+      instrs = student_compile(defns, exprs)
 
     # if requested, output generated rasm
     if args.rasm:
@@ -59,9 +53,6 @@ try:
     if args.run:
       vm = VirtualMachine()
       vm.execute(instrs)
-      print_num(vm.rans)
-  except EmptyProgram:
-    pass
   except (LexError, ParseError, CompileError, VMError) as err:
     print(err)
   except NotImplementedError as err:

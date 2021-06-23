@@ -42,6 +42,10 @@ class RasmParser(Parser):
       elif self.matches(Tok.RET):
         self.eat(Tok.RET)
         instrs.append(Ret())
+      elif self.matches(Tok.PRINT):
+        self.eat(Tok.PRINT)
+        op = self.parse_operand()
+        instrs.append(Print(op))
 
     return instrs
 
@@ -113,6 +117,7 @@ class Tok(Enum):
   RET = auto()
   RANS = auto()
   RSP = auto()
+  PRINT = auto()
 
 def display_token_name(name: Tok) -> str:
   """Convert a token name into a user-facing string"""
@@ -154,6 +159,8 @@ def display_token_name(name: Tok) -> str:
     return "rans"
   elif name == Tok.RSP:
     return "rsp"
+  elif name == Tok.PRINT:
+    return "print"
 
 # global lexer for rasm
 lexer = Lexer([
@@ -175,6 +182,7 @@ lexer = Lexer([
   Pattern(r"ret",                   lambda s: Token(Tok.RET, None)),
   Pattern(r"rans",                  lambda s: Token(Tok.RANS, None)),
   Pattern(r"rsp",                   lambda s: Token(Tok.RSP, None)),
+  Pattern(r"print",                 lambda s: Token(Tok.PRINT, None)),
   Pattern(r"[a-zA-Z][a-zA-Z0-9_]*", lambda s: Token(Tok.LABEL, s)),
   Pattern(r"-?[0-9]+(\.[0-9]+)?",   lambda s: Token(Tok.NUM, float(s))),
 ])

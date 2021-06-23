@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from enum import Enum, auto
 from compiler.Defn import *
 from compiler.Expr import *
@@ -10,12 +10,9 @@ class ProgramParser(Parser):
   def __init__(self, display_token_name):
     super().__init__(display_token_name)
 
-  def parse(self, tokens: List[Token]) -> (List[Defn], Expr):
+  def parse(self, tokens: List[Token]) -> Tuple[List[Defn], List[Expr]]:
     """Parses a full program (defns and then a body) from its 
     input token stream"""
-    if len(tokens) == 0:
-      raise EmptyProgram
-
     # initialize parser state
     self.setup(tokens)
 
@@ -25,14 +22,10 @@ class ProgramParser(Parser):
     while self.matches_prefix(defn_prefix):
       defns.append(self.parse_defn())
 
-    body = None # optional body
-
-    # if there are more tokens, parse a body expression
-    if self.index < len(self.tokens):
-      body = self.parse_expr()
-
-    if self.index < len(self.tokens):
-      raise ParseError("body must be last expression in program")
+    # parse expressions for the rest of the program
+    exprs = []
+    while self.index < len(self.tokens):
+      exprs.append(self.parse_expr())
 
     # check defns for uniqueness
     defn_names = set()
@@ -42,7 +35,7 @@ class ProgramParser(Parser):
       else:
         defn_names.add(d.name)
 
-    return (defns, body)
+    return (defns, exprs)
 
   def parse_defn(self) -> Defn:
     if self.empty():
@@ -122,6 +115,13 @@ class ProgramParser(Parser):
         self.eat(Tok.RPAREN)
         return Equals(left, right)
 
+      elif self.matches(Tok.PRINTEXPR):
+        self.eat(Tok.PRINTEXPR)
+        operand = self.parse_expr()
+        self.eat(Tok.RPAREN)
+
+        return PrintExpr(operand)
+
       # conditionals
       elif self.matches(Tok.IF):
         self.eat(Tok.IF)
@@ -147,7 +147,7 @@ class ProgramParser(Parser):
         self.eat(Tok.RPAREN)
 
         return Let(name, value, body)
-      
+
       # must be an App
       else:
         if not self.matches(Tok.SYM):
@@ -176,10 +176,6 @@ class ProgramParser(Parser):
       raise ParseError(
         f"invalid expression near {display_token_name(self.peek().name)}")
 
-class EmptyProgram(Exception):
-  """Exception for indicating empty input"""
-  pass
-
 class Tok(Enum):
   LPAREN = auto()
   RPAREN = auto()
@@ -194,6 +190,7 @@ class Tok(Enum):
   EQUALS = auto()
   IF = auto()
   LET = auto()
+  PRINTEXPR = auto()
 
 def display_token_name(name: Tok) -> str:
   """Convert a token name into a user-facing string"""
@@ -223,6 +220,8 @@ def display_token_name(name: Tok) -> str:
     return "'if'"
   elif name == Tok.LET:
     return "'let'"
+  elif name == Tok.PRINTEXPR:
+    return "print"
 
 # global lexer for programs
 lexer = Lexer([
@@ -239,6 +238,7 @@ lexer = Lexer([
   Pattern(r"=",                         lambda s: Token(Tok.EQUALS, None)),
   Pattern(r"if",                        lambda s: Token(Tok.IF, None)),
   Pattern(r"let",                       lambda s: Token(Tok.LET, None)),
+  Pattern(r"print",                     lambda s: Token(Tok.PRINTEXPR, None)),
   Pattern(r"-?[0-9]+(\.[0-9]+)?",       lambda s: Token(Tok.NUM, float(s))),
   Pattern(r"[a-zA-Z][a-zA-Z0-9\?\!-]*", lambda s: Token(Tok.SYM, s)),
 ])
@@ -246,7 +246,7 @@ lexer = Lexer([
 # global parser for programs
 parser = ProgramParser(display_token_name)
 
-def parse_program(pgrm: str) -> (List[Defn], Expr):
+def parse_program(pgrm: str) -> Tuple[List[Defn], List[Expr]]:
   """Parses a string program to produce a list of function
   definitions and a program body expression"""
   tokens = lexer.lex(pgrm)

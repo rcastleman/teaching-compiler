@@ -1,6 +1,7 @@
 from typing import List
 from .Operand import *
 from .Instr import *
+from scripts.util import print_num
 
 STACK_SIZE = 10_000
 ENTRY_LABEL = "entry"
@@ -92,10 +93,11 @@ class VirtualMachine:
     else:
       raise InvalidTarget(self, label)
 
-  def execute(self, pgrm: List[Instr]):
+  def execute(self, pgrm: List[Instr], suppress_output=False):
     """Execute a program (list of instructions), leaving
     the machine in a new state"""
     self.__init__()
+    self.suppress_output = suppress_output
     self.pgrm = pgrm
     self.label_addrs = self.map_labels(pgrm)
 
@@ -191,6 +193,13 @@ class VirtualMachine:
       # jump to return address
       self.rip = addr
       return
+
+    # print a value
+    elif instr.isPrint():
+      value = self.load_operand(instr.operand)
+
+      if not self.suppress_output:
+        print_num(value)
 
     else:
       raise InvalidInstr(self, instr)

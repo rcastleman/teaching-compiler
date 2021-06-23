@@ -5,4 +5,4 @@
     1
     (* n (fact (sub1 n))))) 
 
-(fact 5)
+(print (fact 5))

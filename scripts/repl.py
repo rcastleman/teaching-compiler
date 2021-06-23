@@ -27,18 +27,22 @@ def launch_repl(compile):
   # handle SIGINT by exiting gracefully
   signal.signal(signal.SIGINT, quit_handler)
 
-  defns = []
+  running_defns = []
   vm = VirtualMachine()
 
   # REPL loop
   while True:
     pgrm = input("> ")
     try:
-      parsed = parse_program(pgrm)
+      (defns, exprs) = parse_program(pgrm)
+
+      # skip empty input
+      if len(defns + exprs) == 0:
+        continue
 
       # defn names in our running list so far
-      defn_names = list(map(lambda d: d.name, defns))
-      for d in parsed[0]:
+      defn_names = list(map(lambda d: d.name, running_defns))
+      for d in defns:
         if d.name in defn_names:
           raise ParseError(f"function '{d.name}' has multiple definitions")
         else:
@@ -46,16 +50,13 @@ def launch_repl(compile):
           defn_names.append(d.name)
 
       # add defns to running list
-      defns += parsed[0]
-      body = parsed[1]
+      running_defns += defns
 
-      # if body expression entered, run it with current defns
-      if body:
-        instrs = compile(defns, body)
+      # if expression(s) entered, compile/run them with current defns
+      if len(exprs) > 0:
+        instrs = compile(running_defns, exprs)
         vm.execute(instrs)
         print_num(vm.rans)
-    except EmptyProgram:
-      continue
     except (LexError, ParseError, CompileError, VMError) as err:
       print(err)
     except NotImplementedError as err:

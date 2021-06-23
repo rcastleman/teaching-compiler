@@ -103,6 +103,14 @@ class RasmParserTests(unittest.TestCase):
       parse_rasm("ret"),
       [Ret()])
 
+  def test_print(self):
+    self.assertEqual(
+      parse_rasm("print 10"),
+      [Print(Imm(10))])
+    self.assertEqual(
+      parse_rasm("print [rsp + 40]"),
+      [Print(StackOff(40))])
+
   def test_full_program(self):
     pgrm = """
     entry:
@@ -120,6 +128,9 @@ class RasmParserTests(unittest.TestCase):
       Call("function_fact_5150388492262006291"),
       Sub(Imm(0), Rsp()),
     ])
+
+  def test_empty(self):
+    self.assertEqual(parse_rasm(""), [])
 
   def test_parse_errors(self):
     with self.assertRaises(ParseError):

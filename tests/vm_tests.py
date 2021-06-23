@@ -7,7 +7,7 @@ def from_program(pgrm: list) -> VirtualMachine:
   """Creates a virtual machine and runs it on the 
   given program, for testing purposes"""
   vm = VirtualMachine()
-  vm.execute(pgrm)
+  vm.execute(pgrm, suppress_output=True)
   return vm
 
 # tests for the rasm virtual machine
@@ -17,7 +17,7 @@ class VMTests(unittest.TestCase):
     """Run the given program in a VM and assert
     that the computed rans matches the given rans"""
     vm = VirtualMachine()
-    vm.execute(pgrm)
+    vm.execute(pgrm, suppress_output=True)
     self.assertEqual(vm.rans, rans)
 
   def test_simple(self):
@@ -25,7 +25,7 @@ class VMTests(unittest.TestCase):
     vm.execute([
       Label(ENTRY_LABEL),
       Mov(Imm(5), Rans())
-    ])
+    ], suppress_output=True)
 
     self.assertEqual(vm.rans, 5)
     self.assertEqual(vm.rip, 2)

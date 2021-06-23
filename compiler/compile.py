@@ -7,19 +7,20 @@ from .util import *
 from rasm.Instr import *
 from rasm.Operand import *
 
-def compile(defns: List[Defn], body: Expr) -> List[Instr]:
-  """Consumes a program (list of function definitions and a body) 
+def compile(defns: List[Defn], exprs: List[Expr]) -> List[Instr]:
+  """Consumes a program (lists of function definitions and expressions) 
   and generates equivalent code in the target language"""
   # compile definitions
   defn_instrs = []
   for d in defns:
     defn_instrs += compile_defn(d, defns)
 
-  # compile body
-  body_instrs = compile_expr(body, defns, 1, Env())
+  # compile expressions
+  expr_instrs = []
+  for e in exprs:
+    expr_instrs += compile_expr(e, defns, 1, Env())
 
-  # emit definitions, then entry point
-  return defn_instrs + [Label("entry")] + body_instrs
+  return defn_instrs + [Label("entry")] + expr_instrs
 
 def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]:
   """Generates instructions for a given expression, at a given stack

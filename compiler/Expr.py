@@ -36,6 +36,9 @@ class Expr:
   def isName(self):
     return isinstance(self, Name)
 
+  def isPrintExpr(self):
+    return isinstance(self, PrintExpr)
+
 class Num(Expr):
   def __init__(self, value):
     self.value = value
@@ -178,3 +181,14 @@ class Name(Expr):
 
   def __str__(self):
     return self.name
+
+class PrintExpr(Expr):
+  def __init__(self, operand):
+    self.operand = operand
+
+  def __eq__(self, other):
+    return isinstance(other, PrintExpr) and \
+      self.operand == other.operand
+
+  def __str__(self):
+    return f"(print {self.operand})"

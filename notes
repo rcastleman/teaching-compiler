@@ -39,3 +39,8 @@ add 2, rans"
 mov 5, rans  --> Mov(Imm(5), Rans())
 add 10, rans --> Add(Imm(10), Rans())
 sub 5, rsp  --> Sub(Imm(5), Rsp())
+
+
+(sub1 5) --> 4
+(add1 10) --> 11
+(print 41) --> 41

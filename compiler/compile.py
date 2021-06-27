@@ -45,8 +45,29 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
     # Add together (add instruction)
     return compile_expr(exp.left,defns,si,env) + \
     [Mov(Rans(),StackOff(si))] + \
-    compile_expr(exp.right,defns,si+1,env) + \
-    [Add(StackOff(si),Rans())]
+    compile_expr(exp.right, defns, si + 1, env) + \
+    [Add(StackOff(si), Rans())]
+
+  if exp.isTimes():
+    # Compile left expression (into rans)
+    # Store temporarily on stack
+    # Compile right expression (into rans)
+    # Multiply together (mul instruction)
+    return compile_expr(exp.left,defns,si,env) + \
+    [Mov(Rans(),StackOff(si))] + \
+    compile_expr(exp.right, defns, si + 1, env) + \
+    [Mul(StackOff(si), Rans())]
+
+  if exp.isMinus():
+  # Compile left expression (into rans)
+  # Store temporarily on stack
+  # Compile right expression (into rans)
+  # Subtract right from left (sub instruction)
+    return compile_expr(exp.left,defns,si,env) + \
+    [Mov(Rans(),StackOff(si))] + \
+    compile_expr(exp.right, defns, si + 1, env) + \
+    [Sub(Rans(),StackOff(si))] + \
+    [Mov(StackOff(si),Rans())]
 
   raise NotImplementedError("compile_expr")
 

@@ -38,6 +38,16 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
   if exp.isPrintExpr(): # (print (+ 1 2))
     return compile_expr(exp.operand,defns,si,env) + [Print(Rans())]
 
+  if exp.isPlus():
+    # Compile left expression (into rans)
+    # Store temporarily on stack
+    # Compile right expression (into rans)
+    # Add together (add instruction)
+    return compile_expr(exp.left,defns,si,env) + \
+    [Mov(Rans(),StackOff(si))] + \
+    compile_expr(exp.right,defns,si+1,env) + \
+    [Add(StackOff(si),Rans())]
+
   raise NotImplementedError("compile_expr")
 
 def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:

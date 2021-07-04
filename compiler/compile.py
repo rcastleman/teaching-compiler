@@ -69,6 +69,31 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
     [Sub(Rans(),StackOff(si))] + \
     [Mov(StackOff(si),Rans())]
 
+  if exp.isEquals():
+    # cmp left, right
+    # jne not_equal
+    # equal:
+    #   mov 1, rans
+    #   jmp end
+    # not_equal:
+    #   mov 0, rans
+    # end:
+    equal = gensym("equal")
+    not_equal = gensym("not_equal")
+    end = gensym("end")
+
+    return compile_expr(exp.left,defns,si,env) + \
+      [Mov(Rans(),StackOff(si))] + \
+      compile_expr(exp.right, defns, si + 1, env) + \
+        [Cmp(StackOff(si),Rans()), 
+        Jne(not_equal), 
+          Label(equal),
+          Mov(Imm(1),Rans()),
+          Jmp(end),
+        Label(not_equal),
+          Mov(Imm(0),Rans()),
+        Label(end)]
+
   raise NotImplementedError("compile_expr")
 
 def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:

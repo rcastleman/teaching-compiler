@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 from .Defn import *
 from .Expr import *
 from .Env import *
@@ -80,7 +80,7 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
     # end:
     equal = gensym("equal")
     not_equal = gensym("not_equal")
-    end = gensym("end")
+    equal_end = gensym("equal_end")
 
     return compile_expr(exp.left,defns,si,env) + \
       [Mov(Rans(),StackOff(si))] + \
@@ -89,10 +89,34 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
         Jne(not_equal), 
           Label(equal),
           Mov(Imm(1),Rans()),
-          Jmp(end),
+          Jmp(equal_end),
         Label(not_equal),
           Mov(Imm(0),Rans()),
-        Label(end)]
+        Label(equal_end)]
+
+  if exp.isIf():
+    #   (code for cond here)
+    # 	cmp rans, 0
+    # 	je cond_is_zero
+    # cond_is_NOT_zero:
+    # 	(code for thn here)
+    # 	jmp end
+    # cond_is_zero:
+    # 	(code for els here)
+    # end:
+    if_cond_zero = gensym("if_cond_false")
+    if_cond_not_zero = gensym("if_cond_true")
+    if_end = gensym("if_is_done")
+
+    return compile_expr(exp.cond,defns,si,env) + \
+        [Cmp(Rans(),Imm(0)),
+          Je(if_cond_zero),
+          Label(if_cond_not_zero)] + \
+            compile_expr(exp.thn,defns,si,env) + \
+            [Jmp(if_end),
+          Label(if_cond_zero)] + \
+            compile_expr(exp.els,defns,si,env) + \
+          [Label(if_end)]
 
   raise NotImplementedError("compile_expr")
 

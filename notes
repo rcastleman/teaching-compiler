@@ -45,3 +45,14 @@ add 2, rans"
 (sub1 5) --> 4
 (add1 10) --> 11
 (print 41) --> 41
+
+
+switch cond {
+    case 1:
+        sadlkfjasdlkf
+    case 2:
+
+    case 3:
+
+    default:
+}

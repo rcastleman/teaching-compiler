@@ -118,6 +118,19 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
             compile_expr(exp.els,defns,si,env) + \
           [Label(if_end)]
 
+  if exp.isLet():
+    # (code for value)
+    # mov rans, [rsp + si]
+    # (code for body)
+    # don’t use si!!
+    # name’s value is located at [rsp + si]
+    modified_si = si + 1
+    modified_env = env.extend(exp.name,si)
+  
+    return compile_expr(exp.value,defns,si,env) + \
+            [Mov(Rans(),StackOff(si))] + \
+            compile_expr(exp.body,defns,modified_si,modified_env)
+
   raise NotImplementedError("compile_expr")
 
 def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:

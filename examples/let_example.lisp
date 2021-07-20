@@ -1,4 +1,4 @@
-(let (x 5)
-    (let (y 2)
+(print (let (x 5)
+    (let (y 20)
         (let (z 9)
-            (+ 1 x))))
+            (+ z (+ x y))))))

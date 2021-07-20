@@ -24,7 +24,8 @@ def compile(defns: List[Defn], exprs: List[Expr]) -> List[Instr]:
 
 def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]:
   """Generates instructions for a given expression, at a given stack
-  index, and in a given environment. Leaves the expression's value in rans"""
+  index, and in a given environment. The generated program leaves 
+  the expression's value in rans"""
 
   if exp.isNum():
     return [Mov(Imm(exp.value), Rans())]
@@ -117,6 +118,13 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
           Label(if_cond_zero)] + \
             compile_expr(exp.els,defns,si,env) + \
           [Label(if_end)]
+
+
+  if exp.isName():
+    stack_index = env.lookup(exp.name)
+    if stack_index is None:
+      raise UnboundName(exp.name)	
+    return [Mov(StackOff(stack_index),Rans())]
 
   if exp.isLet():
     # (code for value)

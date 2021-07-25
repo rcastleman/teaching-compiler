@@ -62,3 +62,53 @@ switch cond {
 (let (x 1)
     (let (x 2)
         (+ x 5))
+
+
+def f(x, y):
+    return 2 * (x + y)
+
+f(3, 7)
+
+
+"top-level"
+-->
+    a()
+    x=5
+    f=8
+    g=9
+    --> b()
+        y=6
+        --> c() 
+            return 1
+        <--
+        return y
+    <--
+    return x
+<--
+
+0: | nothing | <--- A's stack frame begins
+1: | 5 |
+2: | 8 |
+3: | 9 |
+4: |   | <--- B's stack frame begins (rsp)
+5: | 6 | [rsp + 1]
+6: |   | <--- C's stack frame begins
+7: |   | 
+8: |   | 
+
+--------------
+
+a()
+
+def a()
+    x = 5
+    b()
+    return x
+
+def b():
+    y = 6
+    c()
+    return y
+
+def c(): 
+    return 1

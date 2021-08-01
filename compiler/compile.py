@@ -132,15 +132,36 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
     # (code for body)
     # don’t use si!!
     # name’s value is located at [rsp + si]
-    modified_si = si + 1
+    incremented_si = si + 1
     modified_env = env.extend(exp.name,si)
   
     return compile_expr(exp.value,defns,si,env) + \
             [Mov(Rans(),StackOff(si))] + \
-            compile_expr(exp.body,defns,modified_si,modified_env)
+            compile_expr(exp.body,defns,incremented_si,modified_env)
+
+# App(fname: str, args: List[Expr])
 
   raise NotImplementedError("compile_expr")
 
+
 def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:
   """Generates instructions for a function definition"""
-  raise NotImplementedError("compile_defn")
+  # Defn(name: str, params: List[str], body: Expr)
+  # == Recipe ==
+  # func:
+  #   (code for body)
+  #   ret
+
+  # set up env
+  new_env = Env()
+  env_index = 1
+  for parameter in defn.params:
+    new_env = new_env.extend(parameter,env_index)
+    env_index += 1
+  
+  si =  len(defn.params) + 1
+
+  return [Label(function_label(defn.name))] + \
+        compile_expr(defn.body,defns,si,new_env) + \
+          [Ret()]
+  

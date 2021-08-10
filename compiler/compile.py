@@ -139,10 +139,38 @@ def compile_expr(exp: Expr, defns: List[Defn], si: int, env: Env) -> List[Instr]
             [Mov(Rans(),StackOff(si))] + \
             compile_expr(exp.body,defns,incremented_si,modified_env)
 
-# App(fname: str, args: List[Expr])
+  # App(fname: str, args: List[Expr])
+  if exp.isApp():
+    # (code for arg 0)
+    # mov rans, [rsp + (si + 1)]
+    # …
+    # (code for arg n)
+    # mov rans, [rsp + (si + 1 + n)]
+    # 
+    # add (si - 1), rsp
+    # call function_label
+    # sub (si -1), rsp
+    
+    deffin =lookup_defn(defns,exp.fname)
+    
+    if deffin is None:
+      raise UndefinedFun(exp.fname)
+    
+    if len(deffin.params) != len(exp.args):
+      raise ArityMismatch(exp.args,deffin)
+  
+    move_args_list = []
+    i = 0
+
+    for arg in exp.args:
+      move_args_list += compile_expr(arg,defns,si+1+i,env) + \
+        [Mov(Rans(),StackOff(si+1+i))]
+      i+=1
+    
+    return move_args_list + [Add((Imm(si - 1)),Rsp())] + \
+      [Call(function_label(exp.fname))] + [Sub((Imm(si - 1)),Rsp())]
 
   raise NotImplementedError("compile_expr")
-
 
 def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:
   """Generates instructions for a function definition"""
@@ -159,9 +187,8 @@ def compile_defn(defn: Defn, defns: List[Defn]) -> List[Instr]:
     new_env = new_env.extend(parameter,env_index)
     env_index += 1
   
-  si =  len(defn.params) + 1
+  si = len(defn.params) + 1
 
   return [Label(function_label(defn.name))] + \
         compile_expr(defn.body,defns,si,new_env) + \
           [Ret()]
-  
